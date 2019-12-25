@@ -4,15 +4,15 @@ var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var session = require('express-session');
 var	expressValidator = require('express-validator');
-var pagesRouter = require("./routes/pages.js")
-var adminPagesRouter = require("./routes/admin_pages.js")
+var Page= require('./models/page')
+
 
 //init app
 var app = express ();
 app.set('view engine', 'ejs');
 
 // connect DB 
-mongoose.connect('mongodb://localhost/travels', {
+mongoose.connect('mongodb://localhost/cmscart', {
     useUnifiedTopology: true,
     useNewUrlParser: true,
     });
@@ -78,8 +78,14 @@ app.use(function (req, res, next) {
 app.locals.errors = null;
 
 // routes
+
+var pagesRouter = require("./routes/pages.js")
+var adminPagesRouter = require("./routes/admin_pages.js")
+
 app.use('/', pagesRouter);
 app.use('/admin/pages', adminPagesRouter);
+
+
 // start the server
 app.listen(3000, function(){
     console.log("server started")
