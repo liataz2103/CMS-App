@@ -73,24 +73,28 @@ router.post("/add-page", function(req, res){
 });
 
 // Post reorder pages
-// router.post('/reorder-pages', function(req, res){
-//     var ids = req.body['id[]'];
-//     var count = 0;
+router.post('/reorder-pages', function(req, res){
+    // req.body gives us id with a list of ids 
+    // console.log(req.body);
+    var ids = req.body['id'];
+    var count = 0;
+    // loop though the ids and change the sorting to be the counter num
+    for(var i = 0; i<ids.length; i++){
+        var id = ids[i];
+        count++;
+        (function(count){
 
-//     for(var i = 0; i<ids.length; i++){
-//         var id = ids[i];
-//         count++;
-
-//         (function(count) {
-//             page.findById(id, function (err, page) {
-//                 page.sorting = count;
-//                 page.save(function (err){
-//                     if(err)
-//                     return console.log(err);
-//                 });
-//             });
-//         })(count);
-//     }
-// });
+        
+        Page.findById(id, function(err, page){
+            page.sorting = count;
+            page.save(function (err){
+                if(err){
+                    return console.log(err);
+                }
+            });
+        });
+    })(count);
+    }
+});
 
 module.exports = router;
