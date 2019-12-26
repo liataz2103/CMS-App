@@ -5,6 +5,7 @@ var bodyParser = require("body-parser");
 var session = require('express-session');
 var	expressValidator = require('express-validator');
 var Page= require('./models/page')
+var fileUpload = require('express-fileupload');
 
 
 //init app
@@ -17,6 +18,8 @@ mongoose.connect('mongodb://localhost/cmscart', {
     useNewUrlParser: true,
     });
 
+// Express fileUpload middleware
+app.use(fileUpload());
 
 app.use(bodyParser.urlencoded({extended: true}));
 // set public folder
@@ -82,10 +85,12 @@ app.locals.errors = null;
 var pagesRouter = require("./routes/pages.js")
 var adminPagesRouter = require("./routes/admin_pages.js")
 var adminCategoryRouter = require("./routes/admin_category.js")
+var adminProductsRouter = require("./routes/admin_products.js")
 
 app.use('/', pagesRouter);
 app.use('/admin/pages', adminPagesRouter);
 app.use('/admin/categories', adminCategoryRouter)
+app.use('/admin/products', adminProductsRouter )
 
 // start the server
 app.listen(3000, function(){

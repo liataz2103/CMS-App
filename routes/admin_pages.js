@@ -101,7 +101,7 @@ router.post('/reorder-pages', function(req, res){
 
 //get edit page for one page 
 router.get("/edit-page/:id", function(req, res){
-    Page.findOne(req.params.id, function(err, page){
+    Page.findById(req.params.id, function(err, page){
         if(err){
             return console.log(err);
         }else{
