@@ -81,10 +81,11 @@ app.locals.errors = null;
 
 var pagesRouter = require("./routes/pages.js")
 var adminPagesRouter = require("./routes/admin_pages.js")
+var adminCategoryRouter = require("./routes/admin_category.js")
 
 app.use('/', pagesRouter);
 app.use('/admin/pages', adminPagesRouter);
-
+app.use('/admin/categories', adminCategoryRouter)
 
 // start the server
 app.listen(3000, function(){
