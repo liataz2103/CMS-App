@@ -2,6 +2,7 @@ var express = require("express");
 var router  = express.Router();
 var Page = require('../models/page');
 
+//get afmin page
 router.get("/", function(req, res){
 	Page.find().sort({sorting: 1}).exec(function(err, pages){
         res.render('admin/pages', {
@@ -10,7 +11,7 @@ router.get("/", function(req, res){
     });
 });
 
-
+// get add page form page
 router.get("/add-page", function(req, res){
     var title = "";
     var slug = "";
@@ -22,6 +23,7 @@ router.get("/add-page", function(req, res){
     });
 });
 
+// post to add-page
 router.post("/add-page", function(req, res){
     // validate the title and the content with express validator
     req.checkBody('title', "Title must have a value").notEmpty();
@@ -72,7 +74,7 @@ router.post("/add-page", function(req, res){
     }	
 });
 
-// Post reorder pages
+// Post reorder pages (change the sorting based on the order of the pages in the db)
 router.post('/reorder-pages', function(req, res){
     // req.body gives us id with a list of ids 
     // console.log(req.body);
@@ -96,5 +98,82 @@ router.post('/reorder-pages', function(req, res){
     })(count);
     }
 });
+
+//get edit page for one page 
+router.get("/edit-page/:slug", function(req, res){
+    Page.findOne({slug: req.params.slug}, function(err, page){
+        if(err){
+            return console.log(err);
+        }else{
+            console.log(page);
+            console.log(page.content);
+            res.render("admin/edit_page", {
+            title: page.title,
+            slug: page.slug,
+            content: page.content,
+            id: page._id
+            })
+        }
+    });	
+});
+
+router.post("/edit-page/:slug", function(req, res){
+    // validate the title and the content with express validator
+    req.checkBody('title', "Title must have a value").notEmpty();
+    req.checkBody('content', 'Content must have a value').notEmpty();
+
+    // get the content from the form
+    var title = req.body.title;
+    //slug- we should replace spaces with dashes and change to lowercase
+    var slug = req.body.slug.replace(/\s+/g, '-').toLowerCase();
+    if(slug == ""){
+        var slug = title.replace(/\s+/g, '-').toLowerCase();
+    }
+    var content = req.body.content;
+    var id = req.body.id;
+    console.log(id);
+    var errors = req.validationErrors();
+    
+
+    if(errors){
+        res.render("admin/edit_page", {
+            title: title,
+            slug: slug,
+            content: content,
+            errors: errors,
+            id: id
+        });
+    }else {
+        // make sure slug is unique (does not exist in db)- exluding this specifc page (since we know it exist)
+        Page.findOne({slug: slug, _id: {$ne: id}}, function (err, page){
+            if(page){
+                req.flash('danger', 'Page slug exist, choose another.');
+                res.render("admin/add_page", {
+                    title: title,
+                    slug: slug,
+                    content: content
+                });
+            }else{
+              Page.findById(id, function(err, page){
+                  if (err)
+                    return console.log(err);
+
+                    page.title = title;
+                    page.slug = slug;
+                    page.content = content;
+
+                    page.save(function(err){
+                        if (err) 
+                            return console.log(err);
+                        req.flash('success', 'Page Added');
+                        res.redirect('/admin/pages/edit-page/'+page.slug);
+                });
+            });
+        }
+    })
+    }
+})
+
+                
 
 module.exports = router;
