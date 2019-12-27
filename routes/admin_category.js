@@ -49,7 +49,8 @@ router.post("/add-category", function(req, res){
                 });
             }else{
                 var category = new Category ({
-                    title: title
+                    title: title,
+                    slug: slug
                 });
                 category.save(function(err){
                     if (err) return console.log(err);
