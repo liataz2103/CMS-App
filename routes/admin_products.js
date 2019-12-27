@@ -5,6 +5,21 @@ var Category = require('../models/category');
 var mkdirp = require("mkdirp");
 var fs = require("fs-extra");
 var resizeImg = require("resize-img");
+let multer = require("multer");
+
+
+
+let storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/images');
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
+
+
+
 
 //get products page
 router.get("/", function(req, res){
@@ -21,49 +36,110 @@ router.get("/", function(req, res){
     
 });
 
-// get add category form page
-router.get("/add-category", function(req, res){
+// get add products form page
+router.get("/add-product", function(req, res){
+    // We pass the following variables
     var title = "";
-    var slug = "";
-	res.render("admin/add_category", {
-        title: title,
-        slug: slug
+    var desc= "";
+    var price = "";
+    // send request to db and render add product page with the following data receieved from the db
+    Category.find(function (err, categories){
+        res.render("admin/add_product", {
+            title: title,
+            categories: categories,
+            desc: desc,
+            price: price
+        });
     });
+	
 });
 
-// post to add-page
-router.post("/add-category", function(req, res){
-    // validate the title and the content with express validator
+// post products (get the posted inputs and send to)
+router.post("/add-product", function(req, res){
+    // perform some expresss validations
+    //check that image file is not undefined and if so we set its name to empty string (body parser does not include req.body for files, but fs-extra does)
+    var imgfile = typeof req.files.image != "undefined" ? req.files.image.name: "";
+    console.log(typeof req.files.image);
     req.checkBody('title', "Title must have a value").notEmpty();
+    req.checkBody('desc', "Description must have a value").notEmpty();
+    req.checkBody('price', "Price must have a value").isDecimal();
+    req.checkBody('image', "You must upload an image").isImage(imgfile);
 
+    
     // get the content from the form
     var title = req.body.title;
     //slug- we should replace spaces with dashes and change to lowercase
     var slug = title.replace(/\s+/g, '-').toLowerCase();
+    var desc = req.body.desc;
+    var price = req.body.price;
+    var category = req.body.category;
+    // var imgfile = req.file; //contains the file
     var errors = req.validationErrors();
     
 
     if(errors){
-        res.render("admin/add_category", {
-            title: title,
-            errors: errors
+        Category.find(function(err, categories){
+            res.render("admin/add_product", {
+                title: title,
+                desc: desc,
+                categories: categories,
+                price: price,
+                errors: errors
+            });
         });
+        
     }else {
         // make sure slug is unique (does not exist in db)
-        Category.findOne({slug: slug}, function(err, category){
-            if(category){
-                req.flash('danger', 'Category title exist, choose another.');
-                res.render("admin/add_category", {
-                    title: title
+        Product.findOne({slug: slug}, function(err, product){
+            if(product){
+                req.flash('danger', 'Product title exist, choose another.');
+                Category.find(function(err, categories){
+                    res.render("admin/add_product", {
+                        title: title,
+                        desc: desc,
+                        categories: categories,
+                        price: price,
+                        errors: errors
+                    });
                 });
             }else{
-                var category = new Category ({
-                    title: title
+                // edit the price to have only 2 points after decimal
+                var price2 = parseFloat(price).toFixed(2);
+                var product = new Product ({
+                    title: title,
+                    slug: slug,
+                    desc: desc,
+                    category: category,
+                    price: price2,
+                    image: imgfile
                 });
-                category.save(function(err){
+                product.save(function(err){
                     if (err) return console.log(err);
-                    req.flash('success', 'Category Added');
-                    res.redirect('/admin/categories');
+                    //add the folders in product folders 
+                    mkdirp('public/product_images/'+ product._id, function(err){
+                        return console.log(err);
+                    });
+
+                    mkdirp('public/product_images/'+ product._id +'/gallery', function(err){
+                        return console.log(err);
+                    });
+
+                    mkdirp('public/product_images/'+ product._id + '/galery/tumbs', function(err){
+                        return console.log(err);
+                    });
+
+                    if(imgfile != "") {
+                        var productImage = req.files.image;
+                        var path = 'public/product_images/'+ product._id + '/' + imgfile;
+
+                        // put the image inside the requested path
+                        productImage.mv(path, function(err){
+                            return console.log(err);
+                        });
+                    }
+
+                    req.flash('success', 'Product Added');
+                    res.redirect('/admin/products');
                 });
             }
         });

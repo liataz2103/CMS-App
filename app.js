@@ -6,6 +6,7 @@ var session = require('express-session');
 var	expressValidator = require('express-validator');
 var Page= require('./models/page')
 var fileUpload = require('express-fileupload');
+let multer = require("multer");
 
 
 //init app
@@ -22,6 +23,19 @@ mongoose.connect('mongodb://localhost/cmscart', {
 app.use(fileUpload());
 
 app.use(bodyParser.urlencoded({extended: true}));
+
+
+//multer Configure file upload location
+
+let storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/images');
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
+
 // set public folder
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
@@ -91,6 +105,7 @@ app.use('/', pagesRouter);
 app.use('/admin/pages', adminPagesRouter);
 app.use('/admin/categories', adminCategoryRouter)
 app.use('/admin/products', adminProductsRouter )
+
 
 // start the server
 app.listen(3000, function(){

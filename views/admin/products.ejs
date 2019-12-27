@@ -22,9 +22,9 @@
             <td><%= product.category %></td>
             <td>
                 <% if (product.image == "") { %>
-                    <img src="/images/noimage.png">
+                    <img src="/images/noimage.png" class="imgStyle">
                     <%} else {%>
-                    <img src = "/product_images/<%= product._id %>/<%= product.image %>">
+                    <img src = "/product_images/<%= product._id %>/<%= product.image %>" class="imgStyle">
                     <% } %>
             </td>
             <td><a class="confirmDeletion" href="/admin/products/delete-product/<%= product._id %>">Delete</a></td>

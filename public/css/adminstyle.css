@@ -5,3 +5,12 @@
 .ui-state-hightlight {
     border: 1px dashed #ccc;
 }
+
+#imgPreview {
+    margin-top: 20px;
+}
+
+.imgStyle{
+    width: 50px;
+    height: 50px;
+}
