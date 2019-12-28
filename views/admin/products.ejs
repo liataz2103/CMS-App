@@ -27,7 +27,7 @@
                     <img src = "/product_images/<%= product._id %>/<%= product.image %>" class="imgStyle">
                     <% } %>
             </td>
-            <td><a class="confirmDeletion" href="/admin/products/delete-product/<%= product._id %>">Edit</a></td>
+            <td><a class="confirmDeletion" href="/admin/products/edit-product/<%= product._id %>">Edit</a></td>
             <td><a class="confirmDeletion" href="/admin/products/delete-product/<%= product._id %>">Delete</a></td>
         </tr>
        <% }) %>

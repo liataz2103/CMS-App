@@ -68,7 +68,7 @@ router.post('/add-product', function (req, res) {
     var slug = title.replace(/\s+/g, '-').toLowerCase();
     var desc = req.body.desc;
     var price = req.body.price;
-    var category = req.body.category;
+    var category = req.body.category;   
 
     var errors = req.validationErrors();
 
@@ -126,12 +126,15 @@ router.post('/add-product', function (req, res) {
                     if (imageFile != "") {
                         var productImage = req.files.image;
                         var path = 'public/product_images/' + product._id + '/' + imageFile;
+                        var pathGal = 'public/product_images/' + product._id + '/gallery/' + imageFile;
 
                         productImage.mv(path, function (err) {
                             return console.log(err);
                         });
+                        productImage.mv(pathGal, function (err) {
+                            return console.log(err);
+                        });
                     }
-
                     req.flash('success', 'Product added!');
                     res.redirect('/admin/products');
                 });
@@ -141,70 +144,187 @@ router.post('/add-product', function (req, res) {
 
 });
 
-//get edit category for one page 
-router.get("/edit-category/:id", function(req, res){
-    Category.findOne({slug: req.params.id}, function(err, category){
-        if(err){
-            return console.log(err);
-        }else{
-            res.render("admin/edit_category", {
-            title: category.title,
-            id: category._id
-            })
-        }
-    });	
+//get edit product for one page 
+router.get('/edit-product/:id', function (req, res) {
+
+    var errors;
+
+    if (req.session.errors)
+        errors = req.session.errors;
+    req.session.errors = null;
+
+    Category.find(function (err, categories) {
+
+        Product.findById(req.params.id, function (err, p) {
+            if (err) {
+                console.log(err);
+                res.redirect('/admin/products');
+            } else {
+                var galleryDir = 'public/product_images/' + p._id + '/gallery';
+                var galleryImages = null;
+
+                fs.readdir(galleryDir, function (err, files) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        galleryImages = files;
+
+                        res.render('admin/edit_product', {
+                            title: p.title,
+                            errors: errors,
+                            desc: p.desc,
+                            categories: categories,
+                            category: p.category.replace(/\s+/g, '-').toLowerCase(),
+                            price: parseFloat(p.price).toFixed(2),
+                            image: p.image,
+                            galleryImages: galleryImages,
+                            id: p._id
+                        });
+                    }
+                });
+            }
+        });
+
+    });
+
 });
 
-router.post("/edit-category/:id", function(req, res){
-    // validate the title and the content with express validator
-    req.checkBody('title', "Title must have a value").notEmpty();
+
+
+
+
+
+
+router.post("/edit-product/:id", function(req, res){
+    var imageFile = typeof req.files.image !== "undefined" ? req.files.image.name : "";
+    // ran some validations
+    req.checkBody('title', 'Title must have a value.').notEmpty();
+    req.checkBody('desc', 'Description must have a value.').notEmpty();
+    req.checkBody('price', 'Price must have a value.').isDecimal();
+    req.checkBody('image', 'You must upload an image').isImage(imageFile);
 
     // get the content from the form
     var title = req.body.title;
     //slug- we should replace spaces with dashes and change to lowercase
     var slug = title.replace(/\s+/g, '-').toLowerCase();
-    var id = req.body.id;
+    var desc = req.body.desc;
+    var price = req.body.price;
+    var category = req.body.category;
+    //?
+    var pimage = req.body.pimage;
+    var id = req.params.id;
+
     var errors = req.validationErrors();
-    
 
     if(errors){
-        res.render("admin/edit_category", {
-            title: title,
-            errors: errors,
-            id: id
-        });
+        req.session.errors = errors;
+        res.redirect("admin/products/edit_poduct/" + id);
     }else {
-        // make sure slug is unique (does not exist in db)- exluding this specifc page (since we know it exist)
-        Category.findOne({title: title, _id: {$ne: id}}, function (err, category){
-            if(category){
-                req.flash('danger', 'Category title exist, choose another.');
-                res.render("admin/add_category", {
-                    title: title,
+        Product.findOne({slug: slug, _id: {'$ne': id}}, function (err, p) {
+            if (err)
+                console.log(err);
+
+            if (p) {
+                req.flash('danger', 'Product title exists, choose another.');
+                res.redirect('/admin/products/edit-product/' + id);
+            } else {
+                Product.findById(id, function (err, p) {
+                    if (err)
+                        console.log(err);
+
+                    p.title = title;
+                    p.slug = slug;
+                    p.desc = desc;
+                    p.price = parseFloat(price).toFixed(2);
+                    p.category = category;
+                    if (imageFile != "") {
+                        p.image = imageFile;
+                    }
+
+                    p.save(function (err) {
+                        if (err)
+                            console.log(err);
+
+                        if (imageFile != "") {
+                            if (pimage != "") {
+                                fs.remove('public/product_images/' + id + '/' + pimage, function (err) {
+                                    if (err)
+                                        console.log(err);
+                                });
+                            }
+
+                            var productImage = req.files.image;
+                            var path = 'public/product_images/' + id + '/' + imageFile;
+
+                            productImage.mv(path, function (err) {
+                                return console.log(err);
+                            });
+
+                        }
+
+                        req.flash('success', 'Product edited!');
+                        res.redirect('/admin/products/edit-product/' + id);
+                    });
+
                 });
-            }else{
-              Category.findById(id, function(err, category){
-                  if (err)
-                    return console.log(err);
-                    category.title = title;
-                    category.save(function(err){
-                        if (err) 
-                            return console.log(err);
-                        req.flash('success', 'Category Added');
-                        res.redirect('/admin/categories');
-                });
-            });
-        }
-    })
+            }
+        });
     }
-})
-             
-// Get delete category
-router.get("/delete-product/:id", function(req, res){
-	Category.findByIdAndRemove(req.params.id, function(err){
-        if (err) return console.log(err);
-        req.flash('success', "Category Deleted");
-        res.redirect('/admin/products/');
-    });
+
 });
+
+// Get delete product
+
+router.get('/delete-product/:id', function (req, res) {
+
+    var id = req.params.id;
+    var path = 'public/product_images/' + id;
+
+    fs.remove(path, function (err) {
+        if (err) {
+            console.log(err);
+        } else {
+            Product.findByIdAndRemove(id, function (err) {
+                console.log(err);
+            });
+            
+            req.flash('success', 'Product deleted!');
+            res.redirect('/admin/products');
+        }
+    });
+
+});
+// router.get("/delete-product/:id", function(req, res){
+//     var id = req.params.id;
+//     // var path = 'public/product_images/' + id;
+//     Product.findByIdAndRemove(id, function(err){
+//         if(err){
+//             console.log(err);
+//         }else{
+//             req.flash('success', 'Product Deleted! ');
+//             res.redirect('/admin/products/');
+//         }
+//     });
+// });
+
+
+
+    // fs.remove(path, function(err){
+    //     if(err){
+    //         console.log(err);
+    //     }else{
+    //         Product.findByIdAndRemove(id, function(err){
+    //             if(err){
+    //                 console.log(err);
+    //             }else{
+    //                 req.flash('success', 'Product Deleted! ');
+    //                 res.redirect('admin/products');
+    //             }
+    //         });
+    //     }
+   
+
+
+	
 
 module.exports = router;
