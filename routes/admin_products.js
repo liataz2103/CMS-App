@@ -5,20 +5,6 @@ var Category = require('../models/category');
 var mkdirp = require("mkdirp");
 var fs = require("fs-extra");
 var resizeImg = require("resize-img");
-// let multer = require("multer");
-
-
-
-// let storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb(null, 'public/images');
-//     },
-//     filename: function (req, file, cb) {
-//         cb(null, file.originalname);
-//     }
-// });
-
-
 
 
 //get products page
@@ -294,37 +280,5 @@ router.get('/delete-product/:id', function (req, res) {
     });
 
 });
-// router.get("/delete-product/:id", function(req, res){
-//     var id = req.params.id;
-//     // var path = 'public/product_images/' + id;
-//     Product.findByIdAndRemove(id, function(err){
-//         if(err){
-//             console.log(err);
-//         }else{
-//             req.flash('success', 'Product Deleted! ');
-//             res.redirect('/admin/products/');
-//         }
-//     });
-// });
-
-
-
-    // fs.remove(path, function(err){
-    //     if(err){
-    //         console.log(err);
-    //     }else{
-    //         Product.findByIdAndRemove(id, function(err){
-    //             if(err){
-    //                 console.log(err);
-    //             }else{
-    //                 req.flash('success', 'Product Deleted! ');
-    //                 res.redirect('admin/products');
-    //             }
-    //         });
-    //     }
-   
-
-
-	
 
 module.exports = router;
