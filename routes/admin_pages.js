@@ -66,6 +66,14 @@ router.post("/add-page", function(req, res){
                 });
                 page.save(function(err){
                     if (err) return console.log(err);
+                     // else we would set local variable pages with the resorted pages so it displays immediately
+                     Page.find({}).sort({sorting: 1}).exec(function (err, pages) {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            req.app.locals.pages = pages;
+                        }
+                    });
                     req.flash('success', 'Page Added');
                     res.redirect('/admin/pages');
                 });
@@ -74,39 +82,58 @@ router.post("/add-page", function(req, res){
     }	
 });
 
+// Sort pages function
+function sortPages(ids, callback) {
+    var count = 0;
+    // loop though the ids and change the sorting to be the counter num
+    for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        count++;
+
+        (function (count) {
+            Page.findById(id, function (err, page) {
+                page.sorting = count;
+                page.save(function (err) {
+                    if (err)
+                        return console.log(err);
+                    ++count;
+                    if (count >= ids.length) {
+                        callback();
+                    }
+                });
+            });
+        })(count);
+
+    }
+}
+
+
 // Post reorder pages (change the sorting based on the order of the pages in the db)
 router.post('/reorder-pages', function(req, res){
     // req.body gives us id with a list of ids 
     // console.log(req.body);
     var ids = req.body['id'];
-    var count = 0;
-    // loop though the ids and change the sorting to be the counter num
-    for(var i = 0; i<ids.length; i++){
-        var id = ids[i];
-        count++;
-        (function(count){
-
-        
-        Page.findById(id, function(err, page){
-            page.sorting = count;
-            page.save(function (err){
-                if(err){
-                    return console.log(err);
-                }
-            });
+    
+    sortPages(ids, function(){
+        Page.find({}).sort({sorting: 1}).exec(function (err, pages) {
+            if (err) {
+                console.log(err);
+            } else {
+                // set the local variable pages to be the resorted pages so it displays in real time
+                req.app.locals.pages = pages;
+            }
         });
-    })(count);
-    }
+    });
+
 });
 
+   
 //get edit page for one page 
 router.get("/edit-page/:id", function(req, res){
     Page.findById(req.params.id, function(err, page){
         if(err){
             return console.log(err);
         }else{
-            console.log(page);
-            console.log(page.content);
             res.render("admin/edit_page", {
             title: page.title,
             slug: page.slug,
@@ -150,7 +177,8 @@ router.post("/edit-page/:id", function(req, res){
                 res.render("admin/add_page", {
                     title: title,
                     slug: slug,
-                    content: content
+                    content: content,
+                    id: id
                 });
             }else{
               Page.findById(id, function(err, page){
@@ -164,6 +192,14 @@ router.post("/edit-page/:id", function(req, res){
                     page.save(function(err){
                         if (err) 
                             return console.log(err);
+                        // else we would set local variable pages with the resorted pages so it displays immediately
+                        Page.find({}).sort({sorting: 1}).exec(function (err, pages) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                req.app.locals.pages = pages;
+                            }
+                        });
                         req.flash('success', 'Page Added');
                         res.redirect('/admin/pages/edit-page/'+id);
                 });
@@ -177,6 +213,15 @@ router.post("/edit-page/:id", function(req, res){
 router.get("/delete-page/:id", function(req, res){
 	Page.findByIdAndRemove(req.params.id, function(err){
         if (err) return console.log(err);
+
+         // else we would set local variable pages with the resorted pages so it displays immediately
+         Page.find({}).sort({sorting: 1}).exec(function (err, pages) {
+            if (err) {
+                console.log(err);
+            } else {
+                req.app.locals.pages = pages;
+            }
+        });
 
         req.flash('success', "Page Deleted");
         res.redirect('/admin/pages/');

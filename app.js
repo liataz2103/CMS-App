@@ -24,18 +24,6 @@ app.use(fileUpload());
 
 app.use(bodyParser.urlencoded({extended: true}));
 
-
-//multer Configure file upload location
-
-let storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/images');
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname);
-    }
-});
-
 // set public folder
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
@@ -93,6 +81,18 @@ app.use(function (req, res, next) {
 
 // Set global errors variable
 app.locals.errors = null;
+
+// Get all  pages to access header.ejs (so that the pages links derive from the admin page)
+var page = require('./models/page');
+// we get all the pages from the DB and put then inside of a variable pages. 
+// on the vie of the header we will loop this pages and for each page we will present li with the page on the nav based on the way they are sorted in admin pages
+Page.find({}).sort({sorting: 1}).exec(function (err, pages) {
+    if (err) {
+        console.log(err);
+    } else {
+        app.locals.pages = pages;
+    }
+});
 
 // routes
 
