@@ -15,10 +15,8 @@ router.get("/", function(req, res){
 // get add category form page
 router.get("/add-category", function(req, res){
     var title = "";
-    var slug = "";
 	res.render("admin/add_category", {
         title: title,
-        slug: slug
     });
 });
 
@@ -54,6 +52,14 @@ router.post("/add-category", function(req, res){
                 });
                 category.save(function(err){
                     if (err) return console.log(err);
+
+                    Category.find(function(err, categories){
+                        if(err){
+                            console.log(err);
+                        }else{
+                            req.app.locals.categories = categories;
+                        }
+                    });
                     req.flash('success', 'Category Added');
                     res.redirect('/admin/categories');
                 });
@@ -61,31 +67,6 @@ router.post("/add-category", function(req, res){
         });
     }	
 });
-
-// // Post reorder pages (change the sorting based on the order of the pages in the db)
-// router.post('/reorder-pages', function(req, res){
-//     // req.body gives us id with a list of ids 
-//     // console.log(req.body);
-//     var ids = req.body['id'];
-//     var count = 0;
-//     // loop though the ids and change the sorting to be the counter num
-//     for(var i = 0; i<ids.length; i++){
-//         var id = ids[i];
-//         count++;
-//         (function(count){
-
-        
-//         Page.findById(id, function(err, page){
-//             page.sorting = count;
-//             page.save(function (err){
-//                 if(err){
-//                     return console.log(err);
-//                 }
-//             });
-//         });
-//     })(count);
-//     }
-// });
 
 //get edit category for one page 
 router.get("/edit-category/:id", function(req, res){
@@ -135,6 +116,14 @@ router.post("/edit-category/:id", function(req, res){
                     category.save(function(err){
                         if (err) 
                             return console.log(err);
+
+                        Category.find(function(err, categories){
+                            if(err){
+                                console.log(err);
+                            }else{
+                                req.app.locals.categories = categories;
+                            }
+                        });
                         req.flash('success', 'Category Added');
                         res.redirect('/admin/categories');
                 });
@@ -148,6 +137,13 @@ router.post("/edit-category/:id", function(req, res){
 router.get("/delete-category/:id", function(req, res){
 	Category.findByIdAndRemove(req.params.id, function(err){
         if (err) return console.log(err);
+        Category.find(function(err, categories){
+            if(err){
+                console.log(err);
+            }else{
+                req.app.locals.categories = categories;
+            }
+        });
         req.flash('success', "Category Deleted");
         res.redirect('/admin/categories/');
     });

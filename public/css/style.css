@@ -1,0 +1,28 @@
+.categories-dispay-section{
+    margin-top: 20px;
+}
+
+img.pimage {
+    width: 150px;
+}
+
+
+a.pa {
+    display: inline-block;
+    height: 160px;
+}
+    
+.row.products .p {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.title{
+    font-size: small;
+    /* text-align: center; */
+}
+.price{
+    font-size: small;
+    /* text-align: center; */
+}

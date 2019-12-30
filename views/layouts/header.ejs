@@ -7,8 +7,9 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/style.css"/>
 
-    <title>Home</title>
+    <title><%= title %></title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -35,4 +36,24 @@
         </div>
         </nav>	  
 <div class="container">
-	
+  <!-- display messages location -->
+    <%- messages('messages', locals) %>
+            
+    <% if (errors) {%>
+        <% errors.forEach(function(error) { %>
+        <div class="alert alert-danger">
+            <%= error.msg %>
+        </div>
+        <% });%>
+    <% }%>
+<!-- display categories location -->
+    <div class="row categories-dispay-section"> 
+        <div class="col-xs-12 col-md-3">
+            <h3>Categories</h3>
+            <ul class="list-group">
+                <li class="list-group-item"><a href="/products">All products</a></li>
+                <% categories.forEach(function(c){ %>
+                    <li class="list-group-item"><a href="/products/<%= c.slug %>"><%= c.title %></a></li>
+                <% }); %>
+            </ul>
+        </div>
