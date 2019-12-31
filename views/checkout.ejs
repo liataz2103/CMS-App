@@ -12,11 +12,10 @@
 			<td></td>
 			<td>Subtottal</td>
 		</tr>
-		<% var total = 0;  %>
-		<!-- loop the cart and add in a td -->
+		<% var total = 0; %>
 		<% cart.forEach(function(product){ %>
-			<% var sub = parseFloat(product.price * product.qty).toFixed(2) %>
-			<% total += +sub %>
+		<% var sub = parseFloat(product.qty * product.price).toFixed(2) %>
+		<% total += +sub %>
 			<tr>
 				<td><img class="cpi" src="<%= product.image %>" alt=""></td>
 				<td><%= product.title %></td>
