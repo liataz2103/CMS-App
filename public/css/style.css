@@ -26,3 +26,26 @@ a.pa {
     font-size: small;
     /* text-align: center; */
 }
+
+img.spi {
+    width: 50%;
+}
+
+ul.gallery li {
+    display: inline-block;
+    margin: 20px;
+    list-style: none;
+}
+
+.productPage{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    margin-left: 400px;
+    align-items: center;
+}
+
+/* .imageDisplayProductPage{
+    margin-top: 100px;
+} */
+
