@@ -1,0 +1,57 @@
+<%- include ('./layouts/header') %>
+
+<% if (typeof cart != "undefined") { %>
+	<h1 class="page-title">My Cart</h1>
+	<!-- create a table with the cart details -->
+	<table class="table table-striped alignmiddle">
+		<tr>
+			<td>Image</td>
+			<td>Title</td>
+			<td>Price</td>
+			<td>Quantity</td>
+			<td></td>
+			<td>Subtottal</td>
+		</tr>
+		<% var total = 0;  %>
+		<!-- loop the cart and add in a td -->
+		<% cart.forEach(function(product){ %>
+			<% var sub = parseFloat(product.price * product.qty).toFixed(2) %>
+			<% total += +sub %>
+			<tr>
+				<td><img class="cpi" src="<%= product.image %>" alt=""></td>
+				<td><%= product.title %></td>
+				<td><%= product.price %></td>
+				<td><%= product.qty %></td>
+				<td>
+					<a href="/cart/update/<%= product.title %>?acion=add">+</a>
+					<a href="/cart/update/<%= product.title %>?acion=remove">-</a>
+					<a href="/cart/update/<%= product.title %>?acion=clear">Clear</a>
+				</td>
+				<td>$<%= sub %></td>
+			</tr>
+			<% }); %>
+			<!-- create a new row with the total -->
+			<tr>
+					<td colspan="6" align="right"><b>Total: </b> $<%= parseFloat(total).toFixed(2) %></td>
+			</tr>
+			<tr>
+					<td colspan="5" align="right">
+							<a class="clearcart btn btn-danger" href="/cart/clear">Clear cart</a>
+						</td>
+						<td colspan="5" align="right">
+							<a class="btn btn-primary buynow" href="#">Buy now</a>
+						</td>
+			</tr>
+
+		
+	</table>
+	<% }else {%>
+		<!-- if the cart is undefine  -->
+		<h3 class="text-center">Your cart is empty.</h3>
+
+		<% } %>
+
+
+
+
+<%- include ('./layouts/footer') %>b

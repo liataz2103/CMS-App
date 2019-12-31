@@ -28,10 +28,18 @@
                 <% } %>
             <% }) %>
           </ul>
-          <form class="form-inline my-2 my-lg-0">
-              <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
+          <ul class="nav navbar-nav navbar-right">
+              <li class="nav-item">
+                  <a class="nav-link" href="/cart/checkout">My Cart (
+                      <% if (typeof cart !== "undefined") { %>
+                      <%= cart.length %>
+                      <% } else {%>
+                      0
+                      <% } %>
+                  )</a>
+              </li>
+            </ul>
+          
           </div>
         </div>
         </nav>	  
@@ -47,7 +55,7 @@
         <% });%>
     <% }%>
 <!-- display categories location -->
-    <div class="row categories-dispay-section"> 
+    <div class="row"> 
         <div class="col-xs-12 col-md-3">
             <h3>Categories</h3>
             <ul class="list-group">
@@ -57,3 +65,5 @@
                 <% }); %>
             </ul>
         </div>
+        <div class="col-xs-12 col-md-1"></div>
+        <div class="col-xs-12 col-md-8">
