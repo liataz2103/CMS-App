@@ -54,11 +54,72 @@ router.get('/add/:product', function (req, res) {
 
 //get checkout
 router.get('/checkout', function(req, res){
-    res.render('checkout', {
-        title: "Checkout",
-        cart: req.session.cart
-    });
+    if (req.session.cart && req.session.cart.length == 0 ){
+        delete req.session.cart;
+        res.redirect("/cart/checkout");
+    }else{
+
+        res.render('checkout', {
+            title: "Checkout",
+            cart: req.session.cart
+        });
+    }
+    
 });
+
+
+// update item (add/remove/clear)
+router.get("/update/:product", function(req, res){
+    var slug =  req.params.product;
+    var cart = req.session.cart;
+    var action = req.query.action;
+    console.log(action);
+
+    // to access the items we iterate the cart
+
+    for (var i=0; i<cart.length; i++){
+        // if the title is equal skug it means that;s the item that we wany to update
+        if(cart[i].title == slug){
+            switch (action) {
+                case "add":
+                    cart[i].qty++;
+                    break;
+                case "remove":
+                    cart[i].qty--;
+                    if (cart[i].qty < 1)
+                        cart.splice(i, 1);
+                    break;
+                case "clear":
+                    cart.splice(i, 1);
+                    if (cart.length == 0)
+                        delete req.session.cart;
+                    break;
+                default:
+                    console.log('update problem');
+                    break;
+            }
+            break;
+        }
+    }
+     
+    req.flash('success', "Item updated");
+    res.redirect('/cart/checkout');
+
+});
+
+// get clear cart
+router.get('/clear', function(req, res){
+    
+    delete req.session.cart;
+
+    req.flash('success', "Cart Deleted");
+    res.redirect("/cart/checkout");
+
+
+})
+
+
+
 
 // Exports
 module.exports = router;
