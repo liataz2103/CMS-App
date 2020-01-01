@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var expressValidator = require('express-validator');
 var fileUpload = require('express-fileupload');
+var passport = require('passport');
 
 
 // Connect to db
@@ -117,14 +118,23 @@ app.use(function (req, res, next) {
     next();
 });
 
+
+//Passport Config
+require('./config/passport')(passport);
+// Passport Middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 // cart -> session called cart, which is basically an array that is going to hold objects that are products
 app.get('*', function(req, res, next){
     res.locals.cart = req.session.cart; //now cart will be available in each get request
+    res.locals.user = req.user || null  //now if the user is logged in he will be avalable anf not will be null
     next()
 })
 
 // Set routes 
 var pages = require('./routes/pages.js');
+var users = require('./routes/users.js');
 var products = require('./routes/products.js');
 var cart = require('./routes/cart.js');
 var adminPages = require('./routes/admin_pages.js');
@@ -136,6 +146,7 @@ app.use('/admin/categories', adminCategories);
 app.use('/admin/products', adminProducts);
 app.use('/products', products);
 app.use('/cart', cart);
+app.use('/users', users);
 app.use('/', pages);
 
 // Start the server
