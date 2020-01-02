@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var passport = require("passport")
 var bcrypt = require("bcryptjs")
+var config = require('../config/admin');
 
 // Get user model
 var User = require('../models/user');
@@ -24,6 +25,10 @@ router.post('/register', function (req, res) {
     var email = req.body.email;
     var username = req.body.username;
     var password = req.body.password;
+    var admin = 0;
+    if (password == config.admin){
+        admin = 1;
+    }
     var password2 = req.body.password2;  
     //error validation  
     req.checkBody('name', 'Name is required!').notEmpty();
@@ -41,12 +46,13 @@ router.post('/register', function (req, res) {
             title: 'Register'
         })
     }else{
+
         var user = new User ({
             name: name,
             email: email, 
             username: username,
             password: password,
-            admin: 0
+            admin: admin
         });
 
         // encrypt password before saving inside the db

@@ -1,9 +1,12 @@
 var express = require("express");
 var router  = express.Router();
 var Page = require('../models/page');
+var auth = require('../config/auth');
+var isAdmin = auth.isAdmin;
+
 
 //get afmin page
-router.get("/", function(req, res){
+router.get("/", isAdmin, function(req, res){
 	Page.find().sort({sorting: 1}).exec(function(err, pages){
         res.render('admin/pages', {
             pages: pages
@@ -12,7 +15,7 @@ router.get("/", function(req, res){
 });
 
 // get add page form page
-router.get("/add-page", function(req, res){
+router.get("/add-page", isAdmin,  function(req, res){
     var title = "";
     var slug = "";
     var content = "";
@@ -24,7 +27,7 @@ router.get("/add-page", function(req, res){
 });
 
 // post to add-page
-router.post("/add-page", function(req, res){
+router.post("/add-page", isAdmin,  function(req, res){
     // validate the title and the content with express validator
     req.checkBody('title', "Title must have a value").notEmpty();
     req.checkBody('content', 'Content must have a value').notEmpty();
@@ -129,7 +132,7 @@ router.post('/reorder-pages', function(req, res){
 
    
 //get edit page for one page 
-router.get("/edit-page/:id", function(req, res){
+router.get("/edit-page/:id",  isAdmin, function(req, res){
     Page.findById(req.params.id, function(err, page){
         if(err){
             return console.log(err);
@@ -210,7 +213,7 @@ router.post("/edit-page/:id", function(req, res){
 })
              
 // Get delete page
-router.get("/delete-page/:id", function(req, res){
+router.get("/delete-page/:id", isAdmin,  function(req, res){
 	Page.findByIdAndRemove(req.params.id, function(err){
         if (err) return console.log(err);
 
